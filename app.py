@@ -274,7 +274,7 @@ def sell():
 
         # check to see if they own enough of the stock to sell
 
-        owned_shares = db.execute("SELECT symbol, sum(shares) FROM history WHERE id = %s AND symbol = %s", session["user_id"], symbol))[0]["sum(shares)"]
+        owned_shares = db.execute("SELECT symbol, sum(shares) FROM history WHERE id = $1 AND symbol = $2", session["user_id"], symbol))[0]["sum(shares)"]
 
 #         owned_shares = db.execute("SELECT symbol, sum(shares) FROM history WHERE id, symbol = (%s, %s) GROUP BY symbol", (session["user_id"], symbol))[0]["sum(shares)"]
 
