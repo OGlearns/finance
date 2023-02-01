@@ -20,9 +20,9 @@
                 <tr>
                     <td class="text-start">{{ stocks["symbol"] }}</td>
                     <td class="text-start">{{ stocks["name"] }}</td>
-                    <td class="text-end">{{ stocks["SUM(shares)"] }}</td>
+                    <td class="text-end">{{ stocks["shares_sum"] }}</td>
                     <td class="text-end">{{ stocks["price"] | usd  }}</td>
-                    <td class="text-end">{{ (stocks["SUM(shares)"] * stocks["price"]) | usd }}</td>
+                    <td class="text-end">{{ (stocks["shares_sum"] * stocks["price"]) | usd }}</td>
                 </tr>
             {% endfor %}
         </tbody>
