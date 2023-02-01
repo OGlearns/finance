@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Quoted
+{% endblock %}
+
+{% block main %}
+    <form action="/quoted" method="post">
+        <div class="mb-3">
+            <p> Ticker: {{ quote.symbol }}</p>
+            <p> Name: {{ quote.name }} </p>
+            <p> Share Price: {{ quote.price | usd }} </p>
+        </div>
+    </form>
+{% endblock %}
