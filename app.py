@@ -40,9 +40,10 @@ if not os.environ.get("API_KEY"):
     # pk_2a9957ac066c48ba8fb1dadb24530f09 API KEY for reference
 
 #Make necessary tables for data records
-db.execute("CREATE TABLE IF NOT EXISTS history (transaction_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, shares NUMERIC NOT NULL, symbol TEXT NOT NULL, price NUMERIC NOT NULL, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, id INTEGER, FOREIGN KEY (id) REFERENCES users (id))")
+db.execute("CREATE TABLE IF NOT EXISTS history (transaction_id SERIAL PRIMARY KEY NOT NULL, shares NUMERIC NOT NULL, symbol TEXT NOT NULL, price NUMERIC NOT NULL, timestamp TIMESTAMP DEFAULT NOW() NOT NULL, id INTEGER, FOREIGN KEY (id) REFERENCES users (id))")
 db.execute("CREATE INDEX IF NOT EXISTS history_symbol_shares_id_price_time_idx ON history (id, symbol, shares, price, timestamp)")
 db.execute("CREATE INDEX IF NOT EXISTS users_id_username_hash_cash ON users (id, username, hash, cash)")
+
 
 #db.execute("CREATE INDEX IF NOT EXISTS )
 
