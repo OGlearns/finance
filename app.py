@@ -48,7 +48,7 @@ db.execute("CREATE INDEX IF NOT EXISTS users_id_username_hash_cash_index ON user
 #db.execute("CREATE INDEX IF NOT EXISTS )
 
 def user_balance ():
-    user_shares = db.execute("SELECT symbol, SUM(shares) FROM history WHERE id = ? GROUP BY symbol", session["user_id"])
+    user_shares = db.execute("SELECT symbol, SUM(shares) AS shares_sum FROM history WHERE id = ? GROUP BY symbol", session["user_id"])
 
     if not user_shares:
         return render_template ("index.html", money = 10000, total = 10000)
@@ -61,8 +61,8 @@ def user_balance ():
         for row in user_shares:
             row["name"] = lookup(row["symbol"])["name"]
             row["price"] = lookup(row["symbol"])["price"]
-            total += row["price"] * row["SUM(shares)"]
-            shares = row["SUM(shares)"]
+            total += row["price"] * row["shares_sum"]
+            shares = row["shares_sum"]
         return render_template ("index.html", user_shares=user_shares, money=money, total=total, shares=shares)
 
 @app.after_request
