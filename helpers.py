@@ -50,15 +50,22 @@ def lookup(symbol):
     # Parse response
     try:
         quote = response.json()
+        # print(quote)
         return {
             "name": quote["companyName"],
             "price": float(quote["latestPrice"]),
-            "symbol": quote["symbol"]
+            "symbol": quote["symbol"],
+            "low": float(quote["week52High"]),
+            "high": float(quote["week52Low"]),
         }
     except (KeyError, TypeError, ValueError):
+        
         return None
 
 
 def usd(value):
     """Format value as USD."""
     return f"${value:,.2f}"
+
+# TOTO
+# Create helper function to reutrn top popular symbols

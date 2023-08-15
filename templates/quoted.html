@@ -10,6 +10,8 @@
             <p> Ticker: {{ quote.symbol }}</p>
             <p> Name: {{ quote.name }} </p>
             <p> Share Price: {{ quote.price | usd }} </p>
+            <p> 52 Week Low: {{quote.low | usd}} </p>
+            <p> 52 Week High: {{quote.high | usd}} </p>
         </div>
     </form>
 {% endblock %}

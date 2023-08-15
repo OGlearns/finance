@@ -5,7 +5,6 @@ from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from helpers import apology, login_required, lookup, usd
 
 # Configure application
@@ -13,6 +12,7 @@ app = Flask(__name__)
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.config["ENV"] = "development"
 
 # Custom filter
 app.jinja_env.filters["usd"] = usd
@@ -22,7 +22,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Configure CS50 Library to use SQLite database
+# Configure CS50 Library to use Postgres database
 
 uri = os.getenv("DATABASE_URL")
 if uri.startswith("postgres://"):
@@ -122,8 +122,8 @@ def buy():
             db.execute("UPDATE users SET cash = ? WHERE id = ?", user_cash, session["user_id"])
             flash("Shares successfully purchased!")
         return user_balance()
-
     else:
+
         return render_template("buy.html")
 
 
@@ -206,7 +206,6 @@ def quote():
         quote = lookup(symbol)
         if not quote:
             return apology("must provide a valid stock symbol")
-
         else:
             return render_template("/quoted.html", quote=quote, symbol=symbol)
 

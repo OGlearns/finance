@@ -9,7 +9,8 @@ This is a stock trading Flask application that allows a user to buy and sell sto
 -Flask-Session
 -requests
 -gunicorn
--psycopg2
+-psycopg2-binary
+-urllib3==1.26.5
 
 ## Key Features
 - Buy stocks with fake available cash balance, starting out with $10,000.00
