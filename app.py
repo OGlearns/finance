@@ -59,6 +59,7 @@ def user_balance ():
         total = money
 
         for row in user_shares:
+            print(row)
             row["name"] = lookup(row["symbol"])["name"]
             row["price"] = lookup(row["symbol"])["price"]
             total += row["price"] * row["shares_sum"]
