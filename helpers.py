@@ -56,7 +56,7 @@ def lookup(symbol):
         quote = response.json()
         print(quote)
         return {
-            # "name": quote["Global Quote"]["symbol"],
+            "name": quote["Global Quote"]["01. symbol"],
             "price": float(quote["Global Quote"]["05. price"]),
             "symbol": quote["Global Quote"]["01. symbol"],
             "low": float(quote["Global Quote"]["03. high"]),
