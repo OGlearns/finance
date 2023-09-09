@@ -40,9 +40,13 @@ def lookup(symbol):
 
     # Contact API
     try:
-        api_key = os.environ.get("API_KEY")
-        url = f"https://cloud.iexapis.com/stable/stock/{urllib.parse.quote_plus(symbol)}/quote?token={api_key}"
-        response = requests.get(url)
+        url = "https://alpha-vantage.p.rapidapi.com/query"
+        querystring = {"function":"GLOBAL_QUOTE","symbol":"MSFT","datatype":"json"}
+        headers = {
+        	"X-RapidAPI-Key": os.environ.get("X-RapidAPI-Key"),
+        	"X-RapidAPI-Host": "alpha-vantage.p.rapidapi.com"
+        }
+        response = requests.get(url, headers=headers, params=querystring)
         response.raise_for_status()
     except requests.RequestException:
         return None
@@ -50,13 +54,13 @@ def lookup(symbol):
     # Parse response
     try:
         quote = response.json()
-        # print(quote)
+        print(quote)
         return {
-            "name": quote["companyName"],
-            "price": float(quote["latestPrice"]),
-            "symbol": quote["symbol"],
-            "low": float(quote["week52High"]),
-            "high": float(quote["week52Low"]),
+            # "name": quote["Global Quote"]["symbol"],
+            "price": float(quote["Global Quote"]["price"]),
+            "symbol": quote["Global Quote"]["symbol"],
+            "low": float(quote["Global Quote"]["high"]),
+            "high": float(quote["Global Quote"]["low"]),
         }
     except (KeyError, TypeError, ValueError):
         
