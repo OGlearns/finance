@@ -57,10 +57,10 @@ def lookup(symbol):
         print(quote)
         return {
             # "name": quote["Global Quote"]["symbol"],
-            "price": float(quote["Global Quote"]["price"]),
-            "symbol": quote["Global Quote"]["symbol"],
-            "low": float(quote["Global Quote"]["high"]),
-            "high": float(quote["Global Quote"]["low"]),
+            "price": float(quote["Global Quote"]["05. price"]),
+            "symbol": quote["Global Quote"]["01. symbol"],
+            "low": float(quote["Global Quote"]["03. high"]),
+            "high": float(quote["Global Quote"]["04. low"]),
         }
     except (KeyError, TypeError, ValueError):
         
