@@ -64,7 +64,7 @@ def user_balance ():
             row["name"] = lookup(row["symbol"])["name"]
             print('row["name"]: ',row["name"])
             row["price"] = lookup(row["symbol"])["price"]
-            print("row["price"]: ", row["price"])
+            print('row["price"]: ', row["price"])
             total += row["price"] * row["shares_sum"]
             shares = row["shares_sum"]
         return render_template ("index.html", user_shares=user_shares, money=money, total=total, shares=shares)
