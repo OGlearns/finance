@@ -62,7 +62,7 @@ def user_balance ():
             print('row in user_shares: ', row)
             print('user_shares: ', user_shares)
             row["symbol"] = lookup(row["symbol"])["symbol"]
-            print('row["name"]: ',row["name"])
+
             row["price"] = lookup(row["symbol"])["price"]
             print('row["price"]: ', row["price"])
             total += row["price"] * row["shares_sum"]
