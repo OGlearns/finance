@@ -41,7 +41,7 @@ def lookup(symbol):
     # Contact API
     try:
         url = "https://alpha-vantage.p.rapidapi.com/query"
-        querystring = {"function":"GLOBAL_QUOTE","symbol":"MSFT","datatype":"json"}
+        querystring = {"function":"GLOBAL_QUOTE","symbol":symbol,"datatype":"json"}
         headers = {
         	"X-RapidAPI-Key": os.environ.get("X-RapidAPI-Key"),
         	"X-RapidAPI-Host": "alpha-vantage.p.rapidapi.com"
