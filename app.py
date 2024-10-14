@@ -1,4 +1,4 @@
-import os
+import os,time
 
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
@@ -31,24 +31,48 @@ db = SQL(uri)
 
 
 
-
-
 # Make sure API key is set
-if not os.environ.get("API_KEY"):
+if not os.environ.get("X-RapidAPI-Key"):
     raise RuntimeError("API_KEY not set")
 
-    # pk_2a9957ac066c48ba8fb1dadb24530f09 API KEY for reference
 
 #Make necessary tables for data records
-db.execute("CREATE TABLE IF NOT EXISTS history (transaction_id SERIAL PRIMARY KEY NOT NULL, shares NUMERIC NOT NULL, symbol TEXT NOT NULL, price NUMERIC NOT NULL, timestamp TIMESTAMP DEFAULT NOW() NOT NULL, id INTEGER, FOREIGN KEY (id) REFERENCES users (id))")
-db.execute("CREATE INDEX IF NOT EXISTS history_symbol_shares_id_price_time_index ON history (id, symbol, shares, price, timestamp)")
-db.execute("CREATE INDEX IF NOT EXISTS users_id_username_hash_cash_index ON users (id, username, hash, cash)")
+# db.execute("CREATE TABLE IF NOT EXISTS history (transaction_id SERIAL PRIMARY KEY NOT NULL, shares NUMERIC NOT NULL, symbol TEXT NOT NULL, price NUMERIC NOT NULL, timestamp TIMESTAMP DEFAULT NOW() NOT NULL, id INTEGER, FOREIGN KEY (id) REFERENCES users (id))")
+
+db.execute("""
+CREATE TABLE IF NOT EXISTS history (
+    transaction_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+    shares NUMERIC NOT NULL, 
+    symbol TEXT NOT NULL, 
+    name TEXT NOT NULL,
+    price NUMERIC NOT NULL, 
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, 
+    id INTEGER, 
+    FOREIGN KEY (id) REFERENCES users (id)
+)
+""")
+
+# db.execute("CREATE INDEX IF NOT EXISTS history_symbol_shares_id_price_time_index ON history (id, symbol, shares, price, timestamp)")
+db.execute("""
+CREATE INDEX IF NOT EXISTS history_symbol_shares_id_price_time_index 
+ON history (id, symbol, name, shares, price, timestamp)
+""")
+
+# db.execute("CREATE INDEX IF NOT EXISTS users_id_username_hash_cash_index ON users (id, username, hash, cash)")
+db.execute("""
+CREATE INDEX IF NOT EXISTS users_id_username_hash_cash_index 
+ON users (id, username, hash, cash)
+""")
+
 
 
 #db.execute("CREATE INDEX IF NOT EXISTS )
 
 def user_balance ():
-    user_shares = db.execute("SELECT symbol, SUM(shares) AS shares_sum FROM history WHERE id = ? GROUP BY symbol", session["user_id"])
+    # Add purchase price? 
+    user_shares = db.execute("SELECT symbol, name, SUM(shares) AS shares_sum FROM history WHERE id = ? GROUP BY symbol", session["user_id"])
+    print("user_shares: ",user_shares)
+    # print("shares_sum: ",user_shares[0]["shares_sum"])
 
     if not user_shares:
         return render_template ("index.html", money = 10000, total = 10000)
@@ -58,15 +82,25 @@ def user_balance ():
 
         total = money
 
+        # TODO: Limit API call frequency by using 1 call to get current price of all stocks
+
         for row in user_shares:
-            print('row in user_shares: ', row)
-            print('user_shares: ', user_shares)
-            row["symbol"] = lookup(row["symbol"])["symbol"]
-            print('lookup(row["symbol"])["price"]: ', lookup(row["symbol"])["price"])
-            row["price"] = lookup(row["symbol"])["price"]
-            print('row["price"]: ', row["price"])
-            total += row["price"] * row["shares_sum"]
-            shares = row["shares_sum"]
+            # try:
+                # print('row["symbol"]: ', row["symbol"])
+                # print('row["shares_sum"]: ', row["shares_sum"])
+                # print('lookup(row["symbol"]): ',lookup(row["symbol"]))
+                # row["symbol"] = lookup(row["symbol"])["symbol"]
+                # print('lookup(row["symbol"])["price"]: ', lookup(row["symbol"])["price"])
+                # print("LOOK AT THIS THING: ",lookup(row["symbol"])["price"])
+                row["price"] = lookup(row["symbol"])["price"]
+                time.sleep(0.9)
+                # print('row["price"]: ', row["price"])
+                total += row["price"] * row["shares_sum"]
+                shares = row["shares_sum"]
+
+                # print(shares)
+            # except:
+            #     apology("Oops. Something went wrong..")
         return render_template ("index.html", user_shares=user_shares, money=money, total=total, shares=shares)
 
 @app.after_request
@@ -115,11 +149,13 @@ def buy():
 
         user_cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
 
+
         buying_price = stock["price"] * shares
+
         if buying_price > user_cash:
             return apology("Not enough cash to purchase shares")
         else:
-            db.execute("INSERT INTO history (id, symbol, shares, price) VALUES(?,?,?,?)", session["user_id"], symbol, shares, buying_price)
+            db.execute("INSERT INTO history (id, symbol, name,shares, price) VALUES(?,?,?,?,?)", session["user_id"], symbol, stock["name"], shares, buying_price)
 
             #update the users cash amount
             user_cash = user_cash - buying_price
@@ -206,6 +242,7 @@ def quote():
         symbol = request.form.get("symbol")
         if not symbol:
             return apology("must provide stock symbol for lookup")
+        
 
         quote = lookup(symbol)
         if not quote:
@@ -292,7 +329,7 @@ def sell():
             sale_money = stock_price * shares
 
             #insert selling transaction into history table
-            db.execute("INSERT INTO history (id, symbol, shares, price) VALUES(?,?,?,?)", session["user_id"], symbol, -abs(shares), stock_price)
+            db.execute("INSERT INTO history (id, symbol, name, shares, price) VALUES(?,?,?,?,?)", session["user_id"], symbol,stock["name"] ,-abs(shares), stock_price)
 
             #add sale money to user cash
             db.execute("UPDATE users SET cash = cash + ? WHERE id = ?", sale_money, session["user_id"])

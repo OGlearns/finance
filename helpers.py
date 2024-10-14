@@ -1,4 +1,4 @@
-import os
+import os, time
 import requests
 import urllib.parse
 
@@ -35,37 +35,71 @@ def login_required(f):
     return decorated_function
 
 
+
 def lookup(symbol):
+    print(os.environ.get("X-RapidAPI-Key"))
+
     """Look up quote for symbol."""
+
+    url = "https://yfinance-stock-market-data.p.rapidapi.com/stock-info"
+
+    # Payload for the POST request
+    payload = (
+        "-----011000010111000001101001\r\n"
+        "Content-Disposition: form-data; name=\"symbol\"\r\n\r\n"
+        f"{symbol}\r\n"
+        "-----011000010111000001101001--\r\n\r\n"
+    )
+
+    headers = {
+        "X-RapidAPI-Key": os.environ.get("X-RapidAPI-Key"),
+        "X-RapidAPI-Host": "yfinance-stock-market-data.p.rapidapi.com",
+        "Content-Type": "multipart/form-data; boundary=---011000010111000001101001"
+    }
+
+    def get_stock_data():
+        response = requests.post(url, data=payload, headers=headers)
+        response.raise_for_status()
+        stock = response.json()
+        stock = stock.get("data",0)
+        return stock
 
     # Contact API
     try:
-        url = "https://alpha-vantage.p.rapidapi.com/query"
-        querystring = {"function":"GLOBAL_QUOTE","symbol":symbol,"datatype":"json"}
-        headers = {
-        	"X-RapidAPI-Key": os.environ.get("X-RapidAPI-Key"),
-        	"X-RapidAPI-Host": "alpha-vantage.p.rapidapi.com"
-        }
-        response = requests.get(url, headers=headers, params=querystring)
-        response.raise_for_status()
-    except requests.RequestException:
-        return None
+        stock = get_stock_data()
+        # print("STOCK: ", stock)
+        # return stock  # Return JSON response if successful
+    except requests.RequestException as e:
+        print(e)
+        # return apology("Issue contacting the API..")
+        print("Issue contacting the API..")
+        
+        time.sleep(1)
+
+        try:
+            stock = get_stock_data()
+        except:
+            return None
+
 
     # Parse response
-    try:
-        quote = response.json()
-        print('this is a quote results: ', quote)
-        return {
-            "name": quote["Global Quote"]["01. symbol"],
-            "price": float(quote["Global Quote"]["05. price"]),
-            "symbol": quote["Global Quote"]["01. symbol"],
-            "low": float(quote["Global Quote"]["03. high"]),
-            "high": float(quote["Global Quote"]["04. low"]),
-        }
-    except (KeyError, TypeError, ValueError):
-        
-        return None
-
+    # try:
+        # TODO - Adjust return here to include more stock data.
+    return {
+        # "name": quote["Global Quote"]["01. symbol"],
+        "name": stock["shortName"],
+        # "price": float(quote["Global Quote"]["05. price"]),
+        "price": float(stock["ask"]),
+        # "symbol": quote["Global Quote"]["01. symbol"],
+        "symbol": stock["symbol"],
+        # "low": float(quote["Global Quote"]["03. high"]),
+        "low": float(stock["dayLow"]),
+        # "high": float(quote["Global Quote"]["04. low"]),
+        "high": float(stock["dayLow"]),
+    }
+    # except (KeyError, TypeError, ValueError):
+        # return apology("Error parsing the API response..")
+    
 
 def usd(value):
     """Format value as USD."""
